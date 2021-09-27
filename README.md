@@ -1,6 +1,7 @@
 # Week18-Challenge
 
 ## Models
+
 ### User
  - Username
  - Email
