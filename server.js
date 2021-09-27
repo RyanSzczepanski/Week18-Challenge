@@ -1,3 +1,4 @@
+const { ObjectId } = require("bson");
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -65,6 +66,34 @@ app.delete("/api/users/:id", (req, res) => {
     });
 });
 
+//FRIENDS
+
+app.post("/api/users/:userId/friends/:friendId", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.userId },
+    { $push: { friends: req.params.friendId } }
+  )
+    .then((dbUser) => {
+      res.json(dbUser);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+app.delete("/api/users/:userId/friends/:friendId", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.userId },
+    { $pull: { friends: req.params.friendId } }
+  )
+    .then((dbUser) => {
+      res.json(dbUser);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
 //THOUGHTS
 
 app.post("/api/thoughts", ({ body }, res) => {
@@ -73,7 +102,7 @@ app.post("/api/thoughts", ({ body }, res) => {
     .then((dbThought) => {
       User.findOneAndUpdate(
         { _id: body.userId },
-        { $push: { thoughts: dbThought } }
+        { $push: { thoughts: dbThought._id } }
       ).then();
       res.json(dbThought);
     })
@@ -94,11 +123,34 @@ app.get("/api/thoughts/:id", (req, res) => {
   });
 });
 
-//REACTIONS
-
-app.post("/api/thoughts/:id/reactions", (req, res) => {
+app.put("/api/thoughts/:id", (req, res) => {
   Thought.findOneAndUpdate(
     { _id: req.params.id },
+    { thoughtText: req.body.thoughtText }
+  )
+    .then((thought) => {
+      res.json(thought);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+app.delete("/api/thoughts/:id", (req, res) => {
+  Thought.findOneAndDelete({ _id: req.params.id })
+    .then((thought) => {
+      res.json(thought);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+//REACTIONS
+
+app.post("/api/thoughts/:thoughtId/reactions", (req, res) => {
+  Thought.findOneAndUpdate(
+    { _id: req.params.thoughtId },
     { $push: { reactions: req.body } }
   )
     .then(() => {
@@ -109,11 +161,24 @@ app.post("/api/thoughts/:id/reactions", (req, res) => {
     });
 });
 
-app.get("/api/thoughts/:id/reactions", (req, res) => {
-  Thought.find({ _id: req.params.id })
+app.get("/api/thoughts/:thoughtId/reactions", (req, res) => {
+  Thought.find({ _id: req.params.thoughtId })
     .select({ reactions: 1 })
     .then((reactions) => {
       res.json(reactions);
+    });
+});
+
+app.delete("/api/thoughts/:thoughtId/reactions/:reactionId", (req, res) => {
+  Thought.findOneAndUpdate(
+    { _id: req.params.thoughtId },
+    { $pull: { reactions: {reactionId: ObjectId(req.params.reactionId)} } }
+  )
+    .then((thought) => {
+      res.json(thought);
+    })
+    .catch((err) => {
+      res.json(err);
     });
 });
 

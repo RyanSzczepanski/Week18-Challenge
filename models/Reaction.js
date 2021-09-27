@@ -24,6 +24,9 @@ const ReactionSchema = new Schema({
     type: String,
     required: "Username is Required",
   },
+},
+{
+ _id: false   
 });
 
 module.exports = ReactionSchema;
