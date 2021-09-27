@@ -13,7 +13,7 @@ const ThoughtSchema = new Schema(
       type: Date,
       default: Date.now,
       get: (date) => {
-        return date.toDateString();
+        return date.toString();
       },
     },
 
@@ -27,6 +27,7 @@ const ThoughtSchema = new Schema(
   {
     toJSON: {
       virtuals: true,
+      getters: true
     },
     id: false,
   }

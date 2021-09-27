@@ -15,7 +15,7 @@ mongoose.connect(
   {}
 );
 
-mongoose.set("debug", true);
+//mongoose.set("debug", true);
 
 //USER
 
@@ -118,6 +118,13 @@ app.get("/api/thoughts", (req, res) => {
 });
 
 app.get("/api/thoughts/:id", (req, res) => {
+  Thought.find({ _id: req.params.id }).then((thought) => {
+    res.json(thought);
+  });
+});
+
+
+app.get("/api/thoughts/:id/date", (req, res) => {
   Thought.find({ _id: req.params.id }).then((thought) => {
     res.json(thought);
   });

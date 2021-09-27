@@ -16,7 +16,7 @@ const ReactionSchema = new Schema({
     type: Date,
     default: Date.now,
     get: (date) => {
-      return date.toDateString();
+      return date.toString();
     },
   },
 
@@ -26,7 +26,10 @@ const ReactionSchema = new Schema({
   },
 },
 {
- _id: false   
+  toJSON: {
+    getters: true
+  },
+ _id: false
 });
 
 module.exports = ReactionSchema;
