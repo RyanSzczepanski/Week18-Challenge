@@ -14,10 +14,11 @@ mongoose.connect(
   {}
 );
 
-//mongoose.set('useCreateIndex', true);
 mongoose.set("debug", true);
 
-app.post("/create", ({ body }, res) => {
+//USER
+
+app.post("/api/users", ({ body }, res) => {
   const user = new User(body);
 
   User.create(user)
@@ -29,17 +30,51 @@ app.post("/create", ({ body }, res) => {
     });
 });
 
-app.get("/users", (req, res) => {
+app.get("/api/users", (req, res) => {
   User.find({}).then((users) => {
     res.json(users);
   });
 });
 
-app.post("/thoughts", ({ body }, res) => {
-  const thought = new Thought(body);
+app.get("/api/users/:id", (req, res) => {
+  User.find({ _id: req.params.id }).then((user) => {
+    res.json(user);
+  });
+});
 
+app.put("/api/users/:id", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.id },
+    { username: req.body.username, email: req.body.email }
+  )
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+app.delete("/api/users/:id", (req, res) => {
+  User.findOneAndDelete({ _id: req.params.id })
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+//THOUGHTS
+
+app.post("/api/thoughts", ({ body }, res) => {
+  const thought = new Thought(body);
   Thought.create(thought)
     .then((dbThought) => {
+      User.findOneAndUpdate(
+        { _id: body.userId },
+        { $push: { thoughts: dbThought } }
+      ).then();
       res.json(dbThought);
     })
     .catch((err) => {
@@ -47,16 +82,39 @@ app.post("/thoughts", ({ body }, res) => {
     });
 });
 
-app.get("/thoughts", (req, res) => {
+app.get("/api/thoughts", (req, res) => {
   Thought.find({}).then((thoughts) => {
     res.json(thoughts);
   });
 });
 
-app.get("/thoughts/:id", (req, res) => {
-  Thought.find({ id: req.params.id }).then((thought) => {
+app.get("/api/thoughts/:id", (req, res) => {
+  Thought.find({ _id: req.params.id }).then((thought) => {
     res.json(thought);
   });
+});
+
+//REACTIONS
+
+app.post("/api/thoughts/:id/reactions", (req, res) => {
+  Thought.findOneAndUpdate(
+    { _id: req.params.id },
+    { $push: { reactions: req.body } }
+  )
+    .then(() => {
+      res.json(req.body);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+app.get("/api/thoughts/:id/reactions", (req, res) => {
+  Thought.find({ _id: req.params.id })
+    .select({ reactions: 1 })
+    .then((reactions) => {
+      res.json(reactions);
+    });
 });
 
 app.listen(PORT, () => {
